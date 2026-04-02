@@ -4,23 +4,20 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  OneToMany,
+  ManyToMany,
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Tag {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ unique: true })
-  name: string;
-
-  @Column()
-  passwordHash: string;
+  tagContent: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => Picture, picture => picture.user)
+  @ManyToMany(() => Picture, (picture) => picture.tags)
   pictures: Picture[];
 }
