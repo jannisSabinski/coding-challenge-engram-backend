@@ -5,6 +5,6 @@ import { BasicAuthGuard } from './basic-auth.guard'
 @Module({
   imports: [UserModule], 
   providers: [BasicAuthGuard],
-  exports: [BasicAuthGuard],
+  exports: [BasicAuthGuard, AuthModule],
 })
 export class AuthModule {}
