@@ -1,46 +1,81 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Picture } from './picture.entity';
-import { Repository } from 'typeorm';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from 'src/user/user.entity';
+import { Picture } from './picture.entity';
+import { User } from '../user/user.entity';
+import { SupabaseService } from '../supabase/supabase.service';
+import { mimeToExt } from '../common/utils/mime-to-ext';
 
 @Injectable()
 export class PictureService {
-  private readonly supabaseClient: SupabaseClient;
-
   constructor(
     @InjectRepository(Picture)
     private readonly pictureRepository: Repository<Picture>,
-    private readonly config: ConfigService,
-  ) {
-    this.supabaseClient = createClient(
-      this.config.get('SUPABASE_URL')!,
-      this.config.get('SUPABASE_SECRET_KEY')!,
-    );
+    private readonly supabaseService: SupabaseService,
+  ) {}
+
+  async create(user: User, buffer: Buffer, mimetype: string): Promise<Picture> {
+    const ext = mimeToExt(mimetype);
+    const pictureId = uuidv4();
+    const fileName = `${pictureId}.${ext}`;
+
+    await this.supabaseService.upload(fileName, buffer, mimetype);
+
+    return this.pictureRepository.save({
+      id: pictureId,
+      fileName,
+      user: user,
+    });
   }
 
-  async upload(
+  async updateFile(
     user: User,
-    filename: string,
+    pictureId: string,
     buffer: Buffer,
     mimetype: string,
   ): Promise<void> {
-    
-    const { error } = await this.supabaseClient.storage
-      .from('pictures')
-      .upload(filename, buffer, { contentType: mimetype, upsert: true });
+    const picture = await this.pictureRepository.findOne({
+      where: { id: pictureId },
+      relations: ['user'],
+    });
+    if (!picture) throw new NotFoundException('Picture not found');
+    if (picture.user.id !== user.id) throw new ForbiddenException();
 
-    if (error) throw new Error(`Upload failed: ${error.message}`);
+    const ext = mimeToExt(mimetype);
+    const newFileName = `${pictureId}.${ext}`;
+    
+    await this.supabaseService.update(newFileName, buffer, mimetype);
+    await this.pictureRepository.save({ ...picture, fileName: newFileName });
   }
 
-  async delete(filename: string): Promise<void> {
-    const { error } = await this.supabaseClient.storage
-      .from('pictures')
-      .remove([filename]);
+  async delete(user: User, pictureId: string): Promise<void> {
+    const picture = await this.pictureRepository.findOne({
+      where: { id: pictureId },
+      relations: ['user'],
+    });
+    if (!picture) throw new NotFoundException('Picture not found');
+    if (picture.user.id !== user.id) throw new ForbiddenException();
 
-    if (error) throw new Error(`Delete failed: ${error.message}`);
+    await this.supabaseService.delete(picture.fileName);
+    await this.pictureRepository.delete(pictureId);
+  }
+
+  async findAll(): Promise<Picture[]> {
+    return this.pictureRepository.find({ relations: ['user', 'tags'] });
+  }
+
+  async findOne(pictureId: string): Promise<Picture> {
+    const picture = await this.pictureRepository.findOne({
+      where: { id: pictureId },
+      relations: ['user', 'tags'],
+    });
+    if (!picture) throw new NotFoundException('Picture not found');
+    return picture;
   }
 }

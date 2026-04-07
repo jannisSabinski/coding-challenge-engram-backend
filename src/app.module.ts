@@ -7,6 +7,8 @@ import { PictureModule } from './picture/picture.module';
 import { TagModule } from './tag/tag.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SupabaseService } from './supabase/supabase.service';
+import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UserModule,
     PictureModule,
     TagModule,
+    SupabaseModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

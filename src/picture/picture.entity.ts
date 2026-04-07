@@ -12,20 +12,17 @@ import {
 @Entity()
 export class Picture {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ unique: true })
-  storageName: string;
+  id!: string;
 
   @Column()
-  fileName: string;
+  fileName!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => User, (user) => user.pictures)
-  user: User;
+  user!: User;
 
   @ManyToMany(() => Tag, (tag) => tag.pictures)
-  tags: Tag[];
+  tags!: Tag[];
 }
