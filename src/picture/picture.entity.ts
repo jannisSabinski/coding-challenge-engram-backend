@@ -17,6 +17,9 @@ export class Picture {
   @Column()
   fileName!: string;
 
+  @Column()
+  storageName!: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

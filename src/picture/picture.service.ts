@@ -20,16 +20,17 @@ export class PictureService {
     private readonly supabaseService: SupabaseService,
   ) {}
 
-  async create(user: User, buffer: Buffer, mimetype: string): Promise<Picture> {
+  async create(user: User, fileName:string, buffer: Buffer, mimetype: string): Promise<Picture> {
     const ext = mimeToExt(mimetype);
     const pictureId = uuidv4();
-    const fileName = `${pictureId}.${ext}`;
+    const storageName = `${pictureId}.${ext}`;
 
-    await this.supabaseService.upload(fileName, buffer, mimetype);
+    await this.supabaseService.upload(storageName, buffer, mimetype);
 
     return this.pictureRepository.save({
       id: pictureId,
-      fileName,
+      fileName: fileName,
+      storageName: storageName,
       user: user,
     });
   }
@@ -39,6 +40,7 @@ export class PictureService {
     pictureId: string,
     buffer: Buffer,
     mimetype: string,
+    fileName: string
   ): Promise<void> {
     const picture = await this.pictureRepository.findOne({
       where: { id: pictureId },
@@ -51,7 +53,7 @@ export class PictureService {
     const newFileName = `${pictureId}.${ext}`;
     
     await this.supabaseService.update(newFileName, buffer, mimetype);
-    await this.pictureRepository.save({ ...picture, fileName: newFileName });
+    await this.pictureRepository.save({ ...picture, storageName: newFileName , fileName: fileName});
   }
 
   async delete(user: User, pictureId: string): Promise<void> {

@@ -42,7 +42,7 @@ export class PictureController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file provided');
-    return this.pictureService.create(user, file.buffer, file.mimetype);
+    return this.pictureService.create(user, file.originalname, file.buffer, file.mimetype);
   }
 
   @Patch(':id')
@@ -54,7 +54,7 @@ export class PictureController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file provided');
-    return this.pictureService.updateFile(user, id, file.buffer, file.mimetype);
+    return this.pictureService.updateFile(user, id, file.buffer, file.mimetype, file.originalname);
   }
 
   @Delete(':id')
