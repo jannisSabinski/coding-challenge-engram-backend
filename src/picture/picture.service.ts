@@ -64,7 +64,7 @@ export class PictureService {
     if (!picture) throw new NotFoundException('Picture not found');
     if (picture.user.id !== user.id) throw new ForbiddenException();
 
-    await this.supabaseService.delete(picture.fileName);
+    await this.supabaseService.delete(picture.storageName);
     await this.pictureRepository.delete(pictureId);
   }
 

@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -27,5 +28,6 @@ export class Picture {
   user!: User;
 
   @ManyToMany(() => Tag, (tag) => tag.pictures)
+  @JoinTable()
   tags!: Tag[];
 }

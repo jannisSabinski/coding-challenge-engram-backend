@@ -10,14 +10,14 @@ import {
 @Entity()
 export class Tag {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
-  tagContent: string;
+  tagName!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToMany(() => Picture, (picture) => picture.tags)
-  pictures: Picture[];
+  pictures!: Picture[];
 }
