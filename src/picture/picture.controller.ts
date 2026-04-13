@@ -57,24 +57,6 @@ export class PictureController {
     );
   }
 
-  @Patch(':id')
-  @UseGuards(BasicAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async update(
-    @GetUser() user: User,
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) throw new BadRequestException('No file provided');
-    return this.pictureService.updateFile(
-      user,
-      id,
-      file.buffer,
-      file.mimetype,
-      file.originalname,
-    );
-  }
-
   @Delete(':id')
   @UseGuards(BasicAuthGuard)
   async delete(@GetUser() user: User, @Param('id') id: string) {

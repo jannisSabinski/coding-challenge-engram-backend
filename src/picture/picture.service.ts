@@ -38,33 +38,7 @@ export class PictureService {
       id: pictureId,
       fileName: fileName,
       storageName: storageName,
-      user: user,
-    });
-  }
-
-  async updateFile(
-    user: User,
-    pictureId: string,
-    buffer: Buffer,
-    mimetype: string,
-    fileName: string,
-  ): Promise<void> {
-    const picture = await this.pictureRepository.findOne({
-      where: { id: pictureId },
-      relations: ['user'],
-    });
-    if (!picture) throw new NotFoundException('Picture not found');
-    if (picture.user.id !== user.id) throw new ForbiddenException();
-
-    const ext = mimeToExt(mimetype);
-    const newFileName = `${pictureId}.${ext}`;
-
-    await this.supabaseService.delete(picture.storageName);
-    await this.supabaseService.upload(newFileName, buffer, mimetype);
-    await this.pictureRepository.save({
-      ...picture,
-      storageName: newFileName,
-      fileName: fileName,
+      user: {id: user.id},
     });
   }
 
@@ -116,7 +90,6 @@ export class PictureService {
   async findOne(pictureId: string): Promise<Picture> {
     const picture = await this.pictureRepository.findOne({
       where: { id: pictureId },
-      relations: ['user'],
     });
     if (!picture) throw new NotFoundException('Picture not found');
     return picture;
