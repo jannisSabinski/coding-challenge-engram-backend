@@ -9,6 +9,7 @@ import {
   UploadedFile,
   BadRequestException,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PictureService } from './picture.service';
@@ -20,11 +21,19 @@ import { GetUser } from 'src/decorator/get-user.decorator';
 export class PictureController {
   constructor(private readonly pictureService: PictureService) {}
 
-  // ─── Public ───────────────────────────────────────────────
-
   @Get()
-  async findAll() {
-    return this.pictureService.findAll();
+  async findAll(@Query('page') page = 1, @Query('take') take = 10) {
+    return this.pictureService.findAll(+page, +take);
+  }
+
+  @Get('my-images')
+  @UseGuards(BasicAuthGuard)
+  async findMyImages(
+    @GetUser() user,
+    @Query('page') page = 1,
+    @Query('take') take = 10,
+  ) {
+    return await this.pictureService.findMyImages(user, +page, +take);
   }
 
   @Get(':id')
@@ -32,17 +41,20 @@ export class PictureController {
     return this.pictureService.findOne(id);
   }
 
-  // ─── Protected ────────────────────────────────────────────
-
   @Post()
   @UseGuards(BasicAuthGuard)
-  @UseInterceptors(FileInterceptor('file')) 
+  @UseInterceptors(FileInterceptor('file'))
   async upload(
     @GetUser() user: User,
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file provided');
-    return this.pictureService.create(user, file.originalname, file.buffer, file.mimetype);
+    return this.pictureService.create(
+      user,
+      file.originalname,
+      file.buffer,
+      file.mimetype,
+    );
   }
 
   @Patch(':id')
@@ -54,7 +66,13 @@ export class PictureController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file provided');
-    return this.pictureService.updateFile(user, id, file.buffer, file.mimetype, file.originalname);
+    return this.pictureService.updateFile(
+      user,
+      id,
+      file.buffer,
+      file.mimetype,
+      file.originalname,
+    );
   }
 
   @Delete(':id')

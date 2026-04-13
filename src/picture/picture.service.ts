@@ -17,10 +17,17 @@ export class PictureService {
   constructor(
     @InjectRepository(Picture)
     private readonly pictureRepository: Repository<Picture>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly supabaseService: SupabaseService,
   ) {}
 
-  async create(user: User, fileName:string, buffer: Buffer, mimetype: string): Promise<Picture> {
+  async create(
+    user: User,
+    fileName: string,
+    buffer: Buffer,
+    mimetype: string,
+  ): Promise<Picture> {
     const ext = mimeToExt(mimetype);
     const pictureId = uuidv4();
     const storageName = `${pictureId}.${ext}`;
@@ -40,7 +47,7 @@ export class PictureService {
     pictureId: string,
     buffer: Buffer,
     mimetype: string,
-    fileName: string
+    fileName: string,
   ): Promise<void> {
     const picture = await this.pictureRepository.findOne({
       where: { id: pictureId },
@@ -51,9 +58,14 @@ export class PictureService {
 
     const ext = mimeToExt(mimetype);
     const newFileName = `${pictureId}.${ext}`;
-    
-    await this.supabaseService.update(newFileName, buffer, mimetype);
-    await this.pictureRepository.save({ ...picture, storageName: newFileName , fileName: fileName});
+
+    await this.supabaseService.delete(picture.storageName);
+    await this.supabaseService.upload(newFileName, buffer, mimetype);
+    await this.pictureRepository.save({
+      ...picture,
+      storageName: newFileName,
+      fileName: fileName,
+    });
   }
 
   async delete(user: User, pictureId: string): Promise<void> {
@@ -68,14 +80,43 @@ export class PictureService {
     await this.pictureRepository.delete(pictureId);
   }
 
-  async findAll(): Promise<Picture[]> {
-    return this.pictureRepository.find({ relations: ['user', 'tags'] });
+  async findAll(page: number, take: number) {
+    const [data, total] = await this.pictureRepository.findAndCount({
+      skip: (page - 1) * take,
+      take: take,
+    });
+
+    return {
+      data,
+      total,
+      page,
+      take,
+      totalPages: Math.ceil(total / take),
+    };
+  }
+
+  async findMyImages(user: User, page: number, take: number) {
+    const [data, total] = await this.pictureRepository.findAndCount({
+      where: {
+        user: { id: user.id },
+      },
+      skip: (page - 1) * take,
+      take: take,
+    });
+
+    return {
+      data,
+      total,
+      page,
+      take,
+      totalPages: Math.ceil(total / take),
+    };
   }
 
   async findOne(pictureId: string): Promise<Picture> {
     const picture = await this.pictureRepository.findOne({
       where: { id: pictureId },
-      relations: ['user', 'tags'],
+      relations: ['user'],
     });
     if (!picture) throw new NotFoundException('Picture not found');
     return picture;

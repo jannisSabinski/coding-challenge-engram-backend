@@ -25,27 +25,22 @@ export class TagService {
     if (!(await this.pictureExists(dto.pictureId)))
       throw new NotFoundException('Picture not found');
 
-    let tagId: string | undefined = dto.tagId;
+    let tag: Tag | null = await this.tagRepository.findOne({where: {tagName: dto.name}});
 
-    if (tagId) {
-      if (!(await this.tagExists(tagId)))
-        throw new NotFoundException('Tag not found');
-    } else {
-      if (!dto.name)
-        throw new BadRequestException('name is required to create a new tag');
-      const newTag = await this.tagRepository.save({
+    if(!tag){
+      tag = await this.tagRepository.save({
         tagName: dto.name,
       });
-      tagId = newTag.id;
     }
-    if (await this.isAssigned(dto.pictureId, tagId)) {
+
+    if (await this.isAssigned(dto.pictureId, tag.id)) {
       throw new ConflictException('Tag already assigned to this picture');
     } else {
       await this.pictureRepository
         .createQueryBuilder()
         .relation('tags')
         .of(dto.pictureId)
-        .add(tagId);
+        .add(tag.id);
     }
   }
 

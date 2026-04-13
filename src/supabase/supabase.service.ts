@@ -37,10 +37,10 @@ export class SupabaseService {
     if (error) throw new Error(`Update failed: ${error.message}`);
   }
 
-  getPublicUrl(filename: string): string {
+  getPublicUrl(): string {
     const { data } = this.client.storage
       .from('pictures')
-      .getPublicUrl(filename);
+      .getPublicUrl('');
     return data.publicUrl;
   }
 

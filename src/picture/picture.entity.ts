@@ -27,7 +27,7 @@ export class Picture {
   @ManyToOne(() => User, (user) => user.pictures)
   user!: User;
 
-  @ManyToMany(() => Tag, (tag) => tag.pictures)
+  @ManyToMany(() => Tag, (tag) => tag.pictures, {eager: true})
   @JoinTable()
   tags!: Tag[];
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsUUID, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class removeTagDto {
   @IsUUID()

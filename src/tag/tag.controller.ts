@@ -10,7 +10,6 @@ export class TagController {
 
   @Post()
   @UseGuards(BasicAuthGuard)
-  @HttpCode(HttpStatus.CREATED)
   async addTag(@Body() dto: addTagDto) {
     await this.tagService.addTag(dto);
     return { message: 'Tag assigned successfully' };
@@ -18,7 +17,6 @@ export class TagController {
 
   @Delete()
   @UseGuards(BasicAuthGuard)
-  @HttpCode(HttpStatus.OK)
   async removeTag(@Body() dto: removeTagDto) {
     await this.tagService.removeTag(dto);
     return { message: 'Tag removed successfully' };

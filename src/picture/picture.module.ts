@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Picture } from './picture.entity';
 import { SupabaseModule } from 'src/supabase/supabase.module';
 import { UserModule } from 'src/user/user.module';
+import { User } from 'src/user/user.entity';
 
 @Module({
   imports: [
-      TypeOrmModule.forFeature([Picture]),
+      TypeOrmModule.forFeature([Picture, User]),
       SupabaseModule,
       UserModule
     ],
