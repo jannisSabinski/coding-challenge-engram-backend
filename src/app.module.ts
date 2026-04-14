@@ -28,6 +28,9 @@ import { SupabaseModule } from './supabase/supabase.module';
         username: config.get('DB_USER'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_NAME'),
+        ssl: {
+          rejectUnauthorized: false, //für Supabase
+        },
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         migrations: [__dirname + '/migrations/**{.ts,.js}'],
         migrationsRun: true, 
