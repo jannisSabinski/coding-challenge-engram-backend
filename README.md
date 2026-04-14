@@ -34,13 +34,13 @@ Swagger erreichbar unter `/api` (lokal: http://localhost:3000/api), richtig sich
 
 DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, SUPABASE_SECRET_KEY, SUPABASE_URL, SHOW_SWAGGER sollten vorhanden sein, genaue Belegungen für Team Engram befinden sich in der Mail.
 
-2. Abhängigkeiten installieren und starten:
-npm install
-npm run start:dev
+2. Abhängigkeiten installieren und starten: \
+npm install \
+npm run start:dev \
 
 ## Test-Zugangsdaten
-Name: Jannis
-Passwort: testtest
+Name: Jannis  \
+Passwort: testtest \
 
 ## Betrieb ohne Supabase
 Sollte Supabase nicht verwendet werden, muss der SupabaseService entsprechend überarbeitet und die Datenbank-Umgebungsvariablen in der .env manuell auf die alternative Umgebung angepasst werden.
