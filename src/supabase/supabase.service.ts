@@ -37,13 +37,6 @@ export class SupabaseService {
     if (error) throw new Error(`Update failed: ${error.message}`);
   }
 
-  getPublicUrl(): string {
-    const { data } = this.client.storage
-      .from('pictures')
-      .getPublicUrl('');
-    return data.publicUrl;
-  }
-
   async delete(filename: string): Promise<void> {
     const { error } = await this.client.storage
       .from('pictures')
